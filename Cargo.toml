@@ -1,0 +1,10 @@
+
+[workspace]
+members = [
+    "aviator5g-common",
+    "aviator5g-server",
+    "aviator5g-vehicle",
+]
+
+[profile.release]
+lto = true
