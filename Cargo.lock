@@ -73,24 +73,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "aviator5g-controller"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "argh",
- "aviator5g-common",
- "env_logger",
- "futures-channel",
- "futures-util",
- "log",
- "thiserror",
- "tokio",
- "tokio-tungstenite",
- "tungstenite",
- "url",
-]
-
-[[package]]
 name = "aviator5g-server"
 version = "0.1.0"
 dependencies = [
@@ -102,6 +84,25 @@ dependencies = [
  "futures-channel",
  "futures-util",
  "log",
+ "thiserror",
+ "tokio",
+ "tokio-tungstenite",
+ "tungstenite",
+ "url",
+]
+
+[[package]]
+name = "aviator5g-vehicle"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "argh",
+ "aviator5g-common",
+ "env_logger",
+ "futures-channel",
+ "futures-util",
+ "log",
+ "rppal",
  "thiserror",
  "tokio",
  "tokio-tungstenite",
@@ -358,6 +359,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b71991ff56294aa922b450139ee08b3bfc70982c6b2c7562771375cf73542dd4"
 
 [[package]]
+name = "lazy_static"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
+
+[[package]]
 name = "libc"
 version = "0.2.108"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -529,6 +536,16 @@ name = "regex-syntax"
 version = "0.6.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f497285884f3fcff424ffc933e56d7cbca511def0c9831a7f9b5f6153e3cc89b"
+
+[[package]]
+name = "rppal"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c88c9c6248de4d337747b619d8f671055ef48a87dc21b97998833f189a0bbd4f"
+dependencies = [
+ "lazy_static",
+ "libc",
+]
 
 [[package]]
 name = "ryu"

@@ -3,6 +3,8 @@
  * Copyright (c) 2021 SilentByte <https://silentbyte.com/>
  */
 
+use std::str::FromStr;
+
 use serde::{
     Deserialize,
     Serialize,
@@ -10,6 +12,10 @@ use serde::{
 use uuid::Uuid;
 
 pub type Id = Uuid;
+
+pub fn id_from_str(id: &str) -> Id {
+    Uuid::from_str(id).expect("Invalid UUID string")
+}
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
@@ -41,6 +47,10 @@ pub enum ControlMessage {
 
 pub fn parse_control_message(message: &str) -> Result<ControlMessage, String> {
     serde_json::from_str(&message).map_err(|e| e.to_string())
+}
+
+pub fn build_control_message(control_message: &ControlMessage) -> String {
+    serde_json::to_string(control_message).expect("Could not build control message")
 }
 
 pub fn error_chain_fmt(

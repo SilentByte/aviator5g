@@ -28,7 +28,6 @@ use tokio::net::{
     TcpListener,
     TcpStream,
 };
-use tokio_tungstenite::tungstenite::error::Error;
 
 type Tx = UnboundedSender<tungstenite::Message>;
 
@@ -115,7 +114,7 @@ pub enum ServerError {
 }
 
 impl From<tungstenite::Error> for ServerError {
-    fn from(e: Error) -> Self {
+    fn from(e: tungstenite::Error) -> Self {
         Self::ConnectionError(e)
     }
 }
@@ -193,19 +192,19 @@ fn handle_message(
             handle_control_message(server_state, socket_address, control_message)
         }
         tungstenite::Message::Binary(_) => {
-            log::debug!("Received WS Binary: {}", socket_address);
+            log::debug!("Received Binary Message: {}", socket_address);
             Ok(ControlMessageAction::None)
         }
         tungstenite::Message::Ping(_) => {
-            log::debug!("Received WS Ping: {}", socket_address);
+            log::debug!("Received Ping Message: {}", socket_address);
             Ok(ControlMessageAction::None)
         }
         tungstenite::Message::Pong(_) => {
-            log::debug!("Received WS Pong: {}", socket_address);
+            log::debug!("Received Pong Message: {}", socket_address);
             Ok(ControlMessageAction::None)
         }
         tungstenite::Message::Close(_) => {
-            log::debug!("Received WS Close: {}", socket_address);
+            log::debug!("Received Close Message: {}", socket_address);
             Ok(ControlMessageAction::None)
         }
     }
@@ -241,7 +240,7 @@ async fn handle_connection(
                     let server_state = server_state.lock().unwrap();
                     let current_connection = &server_state
                         .connection_from_socket_address(socket_address)
-                        .expect("");
+                        .expect("Unknown connection");
 
                     let current_group_id = &current_connection.group_id;
                     let client_type = &current_connection.client_type;
