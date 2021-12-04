@@ -7,6 +7,7 @@ use std::sync::{
     Arc,
     Mutex,
 };
+use std::time::Duration;
 
 use argh::FromArgs;
 use aviator5g_common::{
@@ -27,18 +28,101 @@ struct Args {
     url: String,
 }
 
-#[derive(Debug)]
-struct VehicleState {
-    ailerons: f64,
-    elevator: f64,
+fn lerp(start: f64, end: f64, amount: f64) -> f64 {
+    (1.0 - amount) * start + amount * end
 }
 
-impl VehicleState {
-    fn new() -> Self {
-        Self {
-            ailerons: 0.0,
-            elevator: 0.0,
-        }
+const DEFAULT_SERVO_PERIOD: Duration = Duration::from_micros(20000);
+const DEFAULT_SERVO_PULSE_MIN: Duration = Duration::from_micros(771);
+const DEFAULT_PULSE_NEUTRAL: Duration = Duration::from_micros(1500);
+const DEFAULT_PULSE_MAX: Duration = Duration::from_micros(2193);
+
+#[derive(Debug)]
+struct Servo {
+    pulse_min: Duration,
+    pulse_neutral: Duration,
+    pulse_max: Duration,
+    pwm: rppal::pwm::Pwm,
+}
+
+impl Servo {
+    fn new(
+        period: Duration,
+        pulse_min: Duration,
+        pulse_neutral: Duration,
+        pulse_max: Duration,
+        channel: rppal::pwm::Channel,
+    ) -> anyhow::Result<Self> {
+        let servo = Self {
+            pulse_min,
+            pulse_neutral,
+            pulse_max,
+            pwm: rppal::pwm::Pwm::with_period(
+                channel,
+                period,
+                pulse_neutral,
+                rppal::pwm::Polarity::Normal,
+                true,
+            )?,
+        };
+
+        Ok(servo)
+    }
+
+    fn rotate(&mut self, amount: f64) -> anyhow::Result<()> {
+        let amount = amount.clamp(-1.0, 1.0);
+        let pulse_us = if amount < 0.0 {
+            lerp(
+                self.pulse_neutral.as_micros() as f64,
+                self.pulse_min.as_micros() as f64,
+                -amount as f64,
+            ) as u64
+        } else if amount > 0.0 {
+            lerp(
+                self.pulse_neutral.as_micros() as f64,
+                self.pulse_max.as_micros() as f64,
+                amount as f64,
+            ) as u64
+        } else {
+            self.pulse_neutral.as_micros() as u64
+        };
+
+        self.pwm.set_pulse_width(Duration::from_micros(pulse_us))?;
+
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+struct VehicleController {
+    ailerons_axis: f64,
+    ailerons_servo: Servo,
+    elevator_axis: f64,
+    elevator_servo: Servo,
+}
+
+impl VehicleController {
+    fn new() -> anyhow::Result<Self> {
+        let controller = Self {
+            ailerons_axis: 0.0,
+            ailerons_servo: Servo::new(
+                DEFAULT_SERVO_PERIOD,
+                DEFAULT_SERVO_PULSE_MIN,
+                DEFAULT_PULSE_NEUTRAL,
+                DEFAULT_PULSE_MAX,
+                rppal::pwm::Channel::Pwm0,
+            )?,
+            elevator_axis: 0.0,
+            elevator_servo: Servo::new(
+                DEFAULT_SERVO_PERIOD,
+                DEFAULT_SERVO_PULSE_MIN,
+                DEFAULT_PULSE_NEUTRAL,
+                DEFAULT_PULSE_MAX,
+                rppal::pwm::Channel::Pwm1,
+            )?,
+        };
+
+        Ok(controller)
     }
 
     fn update_from_control_message_data(&mut self, data: ControlMessageData) {
@@ -46,8 +130,11 @@ impl VehicleState {
             panic!("Expected data for exactly 2 axes");
         }
 
-        self.ailerons = data.axes[0];
-        self.elevator = data.axes[1];
+        self.ailerons_axis = data.axes[0];
+        self.elevator_axis = data.axes[1];
+
+        self.ailerons_servo.rotate(self.ailerons_axis).unwrap();
+        self.elevator_servo.rotate(self.elevator_axis).unwrap();
     }
 }
 
@@ -78,7 +165,7 @@ async fn main() -> anyhow::Result<()> {
         .await
         .expect("Failed to send identification payload");
 
-    let vehicle_state = Arc::new(Mutex::new(VehicleState::new()));
+    let vehicle_state = Arc::new(Mutex::new(VehicleController::new()?));
     ws_stream
         .try_for_each(|message| async {
             match message {
@@ -96,6 +183,7 @@ async fn main() -> anyhow::Result<()> {
                                 .lock()
                                 .unwrap()
                                 .update_from_control_message_data(data);
+
                             log::info!("Vehicle state updated: {:?}", vehicle_state);
                         }
                         _ => {}
