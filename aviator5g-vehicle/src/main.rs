@@ -17,6 +17,7 @@ use aviator5g_common::{
 };
 use futures_util::{
     SinkExt,
+    StreamExt,
     TryStreamExt,
 };
 
@@ -138,6 +139,9 @@ impl VehicleController {
     }
 }
 
+const VEHICLE_GROUP_ID: &str = "14ed4af8-5256-4e74-a5d6-545dfc0b004c";
+const VEHICLE_ID: &str = "e72029c7-ce0f-45c7-bc3a-3e01e5c53944";
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     env_logger::init();
@@ -146,17 +150,16 @@ async fn main() -> anyhow::Result<()> {
     let url = url::Url::parse(&args.url)?;
 
     log::info!("Connecting to server at {}", url);
-    let (mut ws_stream, _) = tokio_tungstenite::connect_async(url).await?;
+    let (ws_stream, _) = tokio_tungstenite::connect_async(url).await?;
+    let (mut outgoing, incoming) = ws_stream.split();
 
-    ws_stream
+    outgoing
         .send(tungstenite::Message::Text(
             aviator5g_common::build_control_message(
                 &aviator5g_common::ControlMessage::Identification(
                     aviator5g_common::IdentificationMessageData {
-                        group_id: aviator5g_common::id_from_str(
-                            "14ed4af8-5256-4e74-a5d6-545dfc0b004c",
-                        ),
-                        id: aviator5g_common::id_from_str("e72029c7-ce0f-45c7-bc3a-3e01e5c53944"),
+                        group_id: aviator5g_common::id_from_str(VEHICLE_GROUP_ID),
+                        id: aviator5g_common::id_from_str(VEHICLE_ID),
                         client_type: ClientType::Vehicle,
                     },
                 ),
@@ -166,7 +169,9 @@ async fn main() -> anyhow::Result<()> {
         .expect("Failed to send identification payload");
 
     let vehicle_state = Arc::new(Mutex::new(VehicleController::new()?));
-    ws_stream
+    let outgoing = Arc::new(Mutex::new(outgoing));
+
+    incoming
         .try_for_each(|message| async {
             match message {
                 tungstenite::Message::Text(text) => {
@@ -186,10 +191,29 @@ async fn main() -> anyhow::Result<()> {
 
                             log::info!("Vehicle state updated: {:?}", vehicle_state);
                         }
+                        ControlMessage::LatencyRequest(data) => {
+                            outgoing
+                                .lock()
+                                .unwrap()
+                                .send(tungstenite::Message::Text(
+                                    aviator5g_common::build_control_message(
+                                        &ControlMessage::LatencyResponse(
+                                            aviator5g_common::LatencyResponseMessageData {
+                                                initiator_id: data.initiator_id,
+                                                responder_id: aviator5g_common::id_from_str(
+                                                    VEHICLE_ID,
+                                                ),
+                                                timestamp: data.timestamp,
+                                            },
+                                        ),
+                                    ),
+                                ))
+                                .await
+                                .unwrap();
+                        }
                         _ => {}
                     }
                 }
-
                 tungstenite::Message::Binary(_) => {
                     log::debug!("Received Binary Message");
                 }

@@ -93,6 +93,10 @@ impl ServerState {
     ) -> Option<&mut ConnectionState> {
         self.connections.get_mut(&address)
     }
+
+    fn connection_from_id(&self, id: aviator5g_common::Id) -> Option<&ConnectionState> {
+        self.connections.values().into_iter().find(|v| v.id == Some(id))
+    }
 }
 
 #[derive(thiserror::Error)]
@@ -139,7 +143,8 @@ struct Args {
 
 pub enum ControlMessageAction {
     None,
-    Forward,
+    ForwardAll,
+    ForwardSingle(aviator5g_common::Id),
 }
 
 fn handle_control_message(
@@ -168,11 +173,19 @@ fn handle_control_message(
             Ok(ControlMessageAction::None)
         }
 
-        ControlMessage::Control(_) => {
+        ControlMessage::Control(_) | ControlMessage::LatencyRequest(_) => {
             if !connection.is_identified() {
                 return Err(ServerError::NotIdentifiedError);
             }
-            Ok(ControlMessageAction::Forward)
+            Ok(ControlMessageAction::ForwardAll)
+        }
+
+        ControlMessage::LatencyResponse(e) => {
+            if !connection.is_identified() {
+                return Err(ServerError::NotIdentifiedError);
+            }
+
+            Ok(ControlMessageAction::ForwardSingle(e.initiator_id))
         }
     }
 }
@@ -236,7 +249,7 @@ async fn handle_connection(
         match handle_message(server_state.clone(), socket_address, message.clone()) {
             Ok(action) => match action {
                 ControlMessageAction::None => {}
-                ControlMessageAction::Forward => {
+                ControlMessageAction::ForwardAll => {
                     let server_state = server_state.lock().unwrap();
                     let current_connection = &server_state
                         .connection_from_socket_address(socket_address)
@@ -256,6 +269,12 @@ async fn handle_connection(
                         })
                         .map(|(_, state)| &state.tx)
                         .for_each(|tx| tx.unbounded_send(message.clone()).unwrap());
+                }
+                ControlMessageAction::ForwardSingle(recipient_id) => {
+                    let server_state = server_state.lock().unwrap();
+                    if let Some(connection) = server_state.connection_from_id(recipient_id) {
+                        connection.tx.unbounded_send(message.clone()).unwrap();
+                    }
                 }
             },
             Err(e) => {

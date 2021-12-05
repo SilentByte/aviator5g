@@ -12,6 +12,7 @@ use serde::{
 use uuid::Uuid;
 
 pub type Id = Uuid;
+pub type DateTime = chrono::DateTime<chrono::Utc>;
 
 pub fn id_from_str(id: &str) -> Id {
     Uuid::from_str(id).expect("Invalid UUID string")
@@ -39,10 +40,27 @@ pub struct ControlMessageData {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct LatencyRequestMessageData {
+    pub initiator_id: Id,
+    pub timestamp: DateTime,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct LatencyResponseMessageData {
+    pub initiator_id: Id,
+    pub responder_id: Id,
+    pub timestamp: DateTime,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ControlMessage {
     Identification(IdentificationMessageData),
     Control(ControlMessageData),
+    LatencyRequest(LatencyRequestMessageData),
+    LatencyResponse(LatencyResponseMessageData),
 }
 
 pub fn parse_control_message(message: &str) -> Result<ControlMessage, String> {
