@@ -34,16 +34,31 @@ fn lerp(start: f64, end: f64, amount: f64) -> f64 {
 }
 
 const DEFAULT_SERVO_PERIOD: Duration = Duration::from_micros(20000);
-const DEFAULT_SERVO_PULSE_MIN: Duration = Duration::from_micros(771);
-const DEFAULT_PULSE_NEUTRAL: Duration = Duration::from_micros(1500);
-const DEFAULT_PULSE_MAX: Duration = Duration::from_micros(2193);
+const DEFAULT_SERVO_PULSE_MIN: Duration = Duration::from_micros(1000);
+const DEFAULT_SERVO_PULSE_NEUTRAL: Duration = Duration::from_micros(1500);
+const DEFAULT_SERVO_PULSE_MAX: Duration = Duration::from_micros(2000);
+
+#[derive(Debug)]
+enum ServoPin {
+    Pwm0,  // Pin: GPIO 18 / Physical 12.
+    Pwm1,  // Pin: GPIO 19 / Physical 35.
+    Soft1, // Pin: GPIO 23 / Physical 16.
+    Soft2,
+}
+
+#[derive(Debug)]
+enum ServoConnection {
+    Hard(rppal::pwm::Pwm),
+    Soft(rppal::gpio::OutputPin),
+}
 
 #[derive(Debug)]
 struct Servo {
+    period: Duration,
     pulse_min: Duration,
     pulse_neutral: Duration,
     pulse_max: Duration,
-    pwm: rppal::pwm::Pwm,
+    connection: ServoConnection,
 }
 
 impl Servo {
@@ -52,20 +67,40 @@ impl Servo {
         pulse_min: Duration,
         pulse_neutral: Duration,
         pulse_max: Duration,
-        channel: rppal::pwm::Channel,
+        pin: ServoPin,
     ) -> anyhow::Result<Self> {
-        let servo = Self {
-            pulse_min,
-            pulse_neutral,
-            pulse_max,
-            pwm: rppal::pwm::Pwm::with_period(
-                channel,
+        let connection = match pin {
+            ServoPin::Pwm0 => ServoConnection::Hard(rppal::pwm::Pwm::with_period(
+                rppal::pwm::Channel::Pwm0,
                 period,
                 pulse_neutral,
                 rppal::pwm::Polarity::Normal,
                 true,
-            )?,
+            )?),
+            ServoPin::Pwm1 => ServoConnection::Hard(rppal::pwm::Pwm::with_period(
+                rppal::pwm::Channel::Pwm1,
+                period,
+                pulse_neutral,
+                rppal::pwm::Polarity::Normal,
+                true,
+            )?),
+            ServoPin::Soft1 => {
+                ServoConnection::Soft(rppal::gpio::Gpio::new()?.get(23)?.into_output())
+            }
+            ServoPin::Soft2 => {
+                unimplemented!();
+            }
         };
+
+        let mut servo = Self {
+            period,
+            pulse_min,
+            pulse_neutral,
+            pulse_max,
+            connection,
+        };
+
+        servo.rotate(0.0)?;
 
         Ok(servo)
     }
@@ -88,7 +123,10 @@ impl Servo {
             self.pulse_neutral.as_micros() as u64
         };
 
-        self.pwm.set_pulse_width(Duration::from_micros(pulse_us))?;
+        match &mut self.connection {
+            ServoConnection::Hard(c) => c.set_pulse_width(Duration::from_micros(pulse_us))?,
+            ServoConnection::Soft(c) => c.set_pwm(self.period, Duration::from_micros(pulse_us))?,
+        }
 
         Ok(())
     }
@@ -100,6 +138,8 @@ struct VehicleController {
     ailerons_servo: Servo,
     elevator_axis: f64,
     elevator_servo: Servo,
+    rudder_axis: f64,
+    rudder_servo: Servo,
 }
 
 impl VehicleController {
@@ -109,17 +149,25 @@ impl VehicleController {
             ailerons_servo: Servo::new(
                 DEFAULT_SERVO_PERIOD,
                 DEFAULT_SERVO_PULSE_MIN,
-                DEFAULT_PULSE_NEUTRAL,
-                DEFAULT_PULSE_MAX,
-                rppal::pwm::Channel::Pwm0,
+                DEFAULT_SERVO_PULSE_NEUTRAL,
+                DEFAULT_SERVO_PULSE_MAX,
+                ServoPin::Pwm0,
             )?,
             elevator_axis: 0.0,
             elevator_servo: Servo::new(
                 DEFAULT_SERVO_PERIOD,
                 DEFAULT_SERVO_PULSE_MIN,
-                DEFAULT_PULSE_NEUTRAL,
-                DEFAULT_PULSE_MAX,
-                rppal::pwm::Channel::Pwm1,
+                DEFAULT_SERVO_PULSE_NEUTRAL,
+                DEFAULT_SERVO_PULSE_MAX,
+                ServoPin::Pwm1,
+            )?,
+            rudder_axis: 0.0,
+            rudder_servo: Servo::new(
+                DEFAULT_SERVO_PERIOD,
+                DEFAULT_SERVO_PULSE_MIN,
+                DEFAULT_SERVO_PULSE_NEUTRAL,
+                DEFAULT_SERVO_PULSE_MAX,
+                ServoPin::Soft1,
             )?,
         };
 
@@ -127,15 +175,18 @@ impl VehicleController {
     }
 
     fn update_from_control_message_data(&mut self, data: ControlMessageData) {
-        if data.axes.len() != 2 {
-            panic!("Expected data for exactly 2 axes");
+        if data.axes.len() != 3 {
+            log::error!("Expected data for exactly 3 axes");
+            return;
         }
 
         self.ailerons_axis = data.axes[0];
         self.elevator_axis = data.axes[1];
+        self.rudder_axis = data.axes[2];
 
         self.ailerons_servo.rotate(self.ailerons_axis).unwrap();
         self.elevator_servo.rotate(self.elevator_axis).unwrap();
+        self.rudder_servo.rotate(self.rudder_axis).unwrap();
     }
 }
 
