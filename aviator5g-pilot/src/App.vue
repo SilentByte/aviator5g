@@ -60,6 +60,12 @@
                     <v-list-item @click="onReverseThrottle">
                         <v-list-item-title>Reverse Throttle</v-list-item-title>
                     </v-list-item>
+
+                    <v-divider />
+
+                    <v-list-item @click="onReloadApp">
+                        <v-list-item-title>Reload App</v-list-item-title>
+                    </v-list-item>
                 </v-list>
             </v-menu>
         </v-app-bar>
@@ -133,6 +139,10 @@ export default class App extends Vue {
         this.app.doUpdateVehicleState({
             throttleReverse: !this.app.vehicleState.aileronsReverse,
         });
+    }
+
+    private onReloadApp() {
+        location.reload();
     }
 
     mounted(): void {
