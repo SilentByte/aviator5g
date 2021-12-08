@@ -212,6 +212,7 @@ $stick-size: 200px;
 }
 
 .left-stick {
+    z-index: 0;
     position: absolute;
     left: $margin-width;
     bottom: $margin-width;
@@ -220,6 +221,7 @@ $stick-size: 200px;
 }
 
 .right-stick {
+    z-index: 0;
     position: absolute;
     right: $margin-width;
     bottom: $margin-width;

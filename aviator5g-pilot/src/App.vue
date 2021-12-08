@@ -18,7 +18,8 @@
 
             <v-spacer />
 
-            <v-btn icon>
+            <v-btn icon
+                   @click="onToggleFullscreen">
                 <v-icon>mdi-fullscreen</v-icon>
             </v-btn>
 
@@ -73,6 +74,14 @@ import { AppModule } from "@/store/app";
 @Component
 export default class App extends Vue {
     private readonly app = getModule(AppModule);
+
+    private onToggleFullscreen() {
+        if(document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            document.documentElement.requestFullscreen({navigationUI: "hide"});
+        }
+    }
 
     private onResetTrims() {
         this.app.doUpdateVehicleState({
