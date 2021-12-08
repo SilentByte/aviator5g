@@ -47,7 +47,7 @@ export class AppModule extends VuexModule {
     private latencyInterval = 0;
 
     isConnected = false;
-    latency: Duration = Duration.fromMillis(0);
+    roundTripLatency: Duration = Duration.fromMillis(0);
 
     vehicleId = utils.uuid4();
     vehicleState: IVehicleState = defaultVehicleState();
@@ -89,9 +89,8 @@ export class AppModule extends VuexModule {
     }
 
     @Mutation
-    setLatency(latency: Duration): void {
-        this.latency = latency;
-        console.log(latency.toMillis());
+    setRoundTripLatency(roundTripLatency: Duration): void {
+        this.roundTripLatency = roundTripLatency;
     }
 
     @Mutation
@@ -116,7 +115,7 @@ export class AppModule extends VuexModule {
 
         if(message.type === "latency_response") {
             const timestamp = DateTime.fromISO(message.timestamp);
-            this.context.commit("setLatency", DateTime.now().diff(timestamp));
+            this.context.commit("setRoundTripLatency", DateTime.now().diff(timestamp));
         }
     }
 

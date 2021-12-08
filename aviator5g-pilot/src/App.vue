@@ -17,7 +17,7 @@
             </v-toolbar-items>
 
             <v-chip v-if="app.isConnected" small color="success">
-                <strong>CONNECTED: {{ app.latency.toMillis() }}ms</strong>
+                <strong>CONNECTED: {{ Math.round(app.roundTripLatency.toMillis() / 2) }}ms</strong>
             </v-chip>
             <v-chip v-else small color="error">
                 <strong>DISCONNECTED</strong>
