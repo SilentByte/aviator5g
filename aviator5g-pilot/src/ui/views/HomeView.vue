@@ -57,6 +57,46 @@
             </table>
         </div>
 
+        <v-slider dense hide-details
+                  class="left-stick-trim-horizontal"
+                  color="accent"
+                  track-color="accent"
+                  min="-1"
+                  max="+1"
+                  step="0.001"
+                  :value="app.vehicleState.rudderTrim"
+                  @change="onLeftStickTrimHorizontalChange" />
+
+        <v-slider dense vertical hide-details
+                  class="left-stick-trim-vertical"
+                  color="accent"
+                  track-color="accent"
+                  min="-1"
+                  max="+1"
+                  step="0.001"
+                  :value="app.vehicleState.throttleTrim"
+                  @change="onLeftStickTrimVerticalChange" />
+
+        <v-slider dense hide-details
+                  class="right-stick-trim-horizontal"
+                  color="accent"
+                  track-color="accent"
+                  min="-1"
+                  max="+1"
+                  step="0.001"
+                  :value="app.vehicleState.rudderTrim"
+                  @change="onRightStickTrimHorizontalChange" />
+
+        <v-slider dense vertical hide-details
+                  class="right-stick-trim-vertical"
+                  color="accent"
+                  track-color="accent"
+                  min="-1"
+                  max="+1"
+                  step="0.001"
+                  :value="app.vehicleState.throttleTrim"
+                  @change="onRightStickTrimVerticalChange" />
+
         <VirtualJoystick class="left-stick"
                          :rest-y="false"
                          :size="200"
@@ -106,19 +146,39 @@ export default class HomeView extends Vue {
 
     private onMoveLeftStick(e: IVirtualJoystickEvent) {
         this.app.doUpdateVehicleState({
-            state: {
-                rudderValue: e.vector.x,
-                throttleValue: e.vector.y,
-            },
+            rudderValue: e.vector.x,
+            throttleValue: e.vector.y,
         });
     }
 
     private onMoveRightStick(e: IVirtualJoystickEvent) {
         this.app.doUpdateVehicleState({
-            state: {
-                aileronsValue: e.vector.x,
-                elevatorValue: e.vector.y,
-            },
+            aileronsValue: e.vector.x,
+            elevatorValue: e.vector.y,
+        });
+    }
+
+    private onLeftStickTrimHorizontalChange(value: number) {
+        this.app.doUpdateVehicleState({
+            rudderTrim: value,
+        });
+    }
+
+    private onLeftStickTrimVerticalChange(value: number) {
+        this.app.doUpdateVehicleState({
+            throttleTrim: value,
+        });
+    }
+
+    private onRightStickTrimHorizontalChange(value: number) {
+        this.app.doUpdateVehicleState({
+            aileronsTrim: value,
+        });
+    }
+
+    private onRightStickTrimVerticalChange(value: number) {
+        this.app.doUpdateVehicleState({
+            elevatorTrim: value,
         });
     }
 }
@@ -129,16 +189,19 @@ export default class HomeView extends Vue {
 
 @import "~@/styles/variables.scss";
 
+$margin-width: 12px;
+$stick-size: 200px;
+
 .state-container {
     display: inline-block;
-    margin: 12px;
-    padding: 12px;
+    margin: $margin-width;
+    padding: $margin-width;
 
     color: white;
     background-color: rgba(0, 0, 0, 0.4);
     border-radius: 4px;
 
-    font-size: 14px;
+    font-size: 10px;
     font-family: Consolas, monospace;
 
     table {
@@ -150,18 +213,72 @@ export default class HomeView extends Vue {
 
 .left-stick {
     position: absolute;
-    left: 12px;
-    bottom: 12px;
-    width: 200px;
-    height: 200px;
+    left: $margin-width;
+    bottom: $margin-width;
+    width: $stick-size;
+    height: $stick-size;
 }
 
 .right-stick {
     position: absolute;
-    right: 12px;
-    bottom: 12px;
-    width: 200px;
-    height: 200px;
+    right: $margin-width;
+    bottom: $margin-width;
+    width: $stick-size;
+    height: $stick-size;
+}
+
+.left-stick-trim-horizontal {
+    position: absolute;
+    left: 2 * $margin-width;
+    bottom: $margin-width + $stick-size + $margin-width;
+
+    opacity: 0.2;
+
+    & ::v-deep .v-slider {
+        margin: 0;
+        width: $stick-size - 2 * $margin-width;
+    }
+}
+
+.left-stick-trim-vertical {
+    position: absolute;
+    left: $margin-width + $stick-size + $margin-width;
+    bottom: 2 * $margin-width;
+    width: 32px;
+
+    opacity: 0.2;
+
+    & ::v-deep .v-slider {
+        margin: 0;
+        height: $stick-size - 2 * $margin-width;
+    }
+}
+
+.right-stick-trim-horizontal {
+    position: absolute;
+    right: 2 * $margin-width;
+    bottom: $margin-width + $stick-size + $margin-width;
+
+    opacity: 0.2;
+
+    & ::v-deep .v-slider {
+        margin: 0;
+        width: $stick-size - 2 * $margin-width;
+    }
+}
+
+.right-stick-trim-vertical {
+    position: absolute;
+    right: $margin-width + $stick-size + $margin-width;
+    bottom: 2 * $margin-width;
+    width: 32px;
+
+    opacity: 0.2;
+
+    & ::v-deep .v-slider {
+        margin: 0;
+        height: $stick-size - 2 * $margin-width;
+    }
 }
 
 </style>

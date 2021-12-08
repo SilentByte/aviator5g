@@ -73,26 +73,12 @@ export class AppModule extends VuexModule {
 
     @Mutation
     updateVehicleState(state: Partial<IVehicleState>): void {
-        if(state.aileronsValue !== undefined) {
-            this.vehicleState.aileronsValue = state.aileronsValue;
-        }
-
-        if(state.elevatorValue !== undefined) {
-            this.vehicleState.elevatorValue = state.elevatorValue;
-        }
-
-        if(state.rudderValue !== undefined) {
-            this.vehicleState.rudderValue = state.rudderValue;
-        }
-
-        if(state.throttleValue !== undefined) {
-            this.vehicleState.throttleValue = state.throttleValue;
-        }
+        Object.assign(this.vehicleState, state);
     }
 
     @Action
-    doUpdateVehicleState(payload: { state: Partial<IVehicleState> }): void {
-        this.context.commit("updateVehicleState", payload.state);
+    doUpdateVehicleState(state: Partial<IVehicleState>): void {
+        this.context.commit("updateVehicleState", state);
         this.rws?.send(JSON.stringify({
             type: "control",
             axes: [
