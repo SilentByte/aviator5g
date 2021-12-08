@@ -84,7 +84,7 @@
                   min="-1"
                   max="+1"
                   step="0.001"
-                  :value="app.vehicleState.rudderTrim"
+                  :value="app.vehicleState.aileronsTrim"
                   @change="onRightStickTrimHorizontalChange" />
 
         <v-slider dense vertical hide-details

@@ -20,7 +20,8 @@ import settings from "@/store/settings";
 
 import {
     defaultVehicleState,
-    IVehicleState, Uuid,
+    IVehicleState,
+    Uuid,
 } from "@/models";
 
 VuexModuleDecoratorsConfig.rawError = true;
