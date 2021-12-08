@@ -70,12 +70,14 @@ export default class VirtualJoystick extends Vue {
         });
 
         (this.manager as any).get().on("end", (e: EventData) => {
+            this.lastVector = {
+                x: this.restX ? 0 : this.lastVector.x,
+                y: this.restY ? 0 : this.lastVector.y,
+            };
+
             this.$emit("move", {
                 eventData: e,
-                vector: {
-                    x: this.restX ? 0 : this.lastVector.x,
-                    y: this.restY ? 0 : this.lastVector.y,
-                },
+                vector: this.lastVector,
             });
         });
     }
