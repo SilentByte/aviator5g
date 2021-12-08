@@ -4,7 +4,7 @@
  -->
 <template>
     <v-app>
-        <v-app-bar app dark
+        <v-app-bar app dark dense
                    elevation="0"
                    color="primary">
             <v-toolbar-items>
@@ -17,6 +17,10 @@
             </v-toolbar-items>
 
             <v-spacer />
+
+            <v-btn icon>
+                <v-icon>mdi-fullscreen</v-icon>
+            </v-btn>
 
             <v-btn icon>
                 <v-icon>mdi-cogs</v-icon>

@@ -10,6 +10,7 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "luxon": "^2.0.2",
+    "nipplejs": "https://github.com/yoannmoinet/nipplejs.git#ce3a67dbfa7b64c5de9ff4a74c008d46e42f5194",
     "uuid": "^8.3.2",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
