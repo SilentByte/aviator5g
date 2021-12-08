@@ -16,6 +16,13 @@
                 </v-btn>
             </v-toolbar-items>
 
+            <v-chip v-if="app.isConnected" small color="success">
+                <strong>CONNECTED: {{ app.latency.toMillis() }}ms</strong>
+            </v-chip>
+            <v-chip v-else small color="error">
+                <strong>DISCONNECTED</strong>
+            </v-chip>
+
             <v-spacer />
 
             <v-btn icon
