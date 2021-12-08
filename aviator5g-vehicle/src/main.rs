@@ -1,5 +1,5 @@
 /*
- * AVIATOR5G SYSTEM
+ * AVIATOR 5G SYSTEM
  * Copyright (c) 2021 SilentByte <https://silentbyte.com/>
  */
 
@@ -42,8 +42,8 @@ const DEFAULT_SERVO_PULSE_MAX: Duration = Duration::from_micros(2000);
 enum ServoPin {
     Pwm0,  // Pin: GPIO 18 / Physical 12.
     Pwm1,  // Pin: GPIO 19 / Physical 35.
-    Soft1, // Pin: GPIO 23 / Physical 16.
-    Soft2,
+    Soft0, // Pin: GPIO 23 / Physical 16.
+    Soft1, // Pin: GPIO 24 / Physical 18.
 }
 
 #[derive(Debug)]
@@ -84,11 +84,11 @@ impl Servo {
                 rppal::pwm::Polarity::Normal,
                 true,
             )?),
-            ServoPin::Soft1 => {
+            ServoPin::Soft0 => {
                 ServoConnection::Soft(rppal::gpio::Gpio::new()?.get(23)?.into_output())
             }
-            ServoPin::Soft2 => {
-                unimplemented!();
+            ServoPin::Soft1 => {
+                ServoConnection::Soft(rppal::gpio::Gpio::new()?.get(24)?.into_output())
             }
         };
 
@@ -140,6 +140,8 @@ struct VehicleController {
     elevator_servo: Servo,
     rudder_axis: f64,
     rudder_servo: Servo,
+    throttle_axis: f64,
+    throttle_servo: Servo,
 }
 
 impl VehicleController {
@@ -167,6 +169,14 @@ impl VehicleController {
                 DEFAULT_SERVO_PULSE_MIN,
                 DEFAULT_SERVO_PULSE_NEUTRAL,
                 DEFAULT_SERVO_PULSE_MAX,
+                ServoPin::Soft0,
+            )?,
+            throttle_axis: 0.0,
+            throttle_servo: Servo::new(
+                DEFAULT_SERVO_PERIOD,
+                DEFAULT_SERVO_PULSE_NEUTRAL, // Prevent throttle from going negative.
+                DEFAULT_SERVO_PULSE_NEUTRAL,
+                DEFAULT_SERVO_PULSE_MAX,
                 ServoPin::Soft1,
             )?,
         };
@@ -175,18 +185,20 @@ impl VehicleController {
     }
 
     fn update_from_control_message_data(&mut self, data: ControlMessageData) {
-        if data.axes.len() != 3 {
-            log::error!("Expected data for exactly 3 axes");
+        if data.axes.len() != 4 {
+            log::error!("Expected data for exactly 4 axes");
             return;
         }
 
         self.ailerons_axis = data.axes[0];
         self.elevator_axis = data.axes[1];
         self.rudder_axis = data.axes[2];
+        self.throttle_axis = data.axes[3];
 
         self.ailerons_servo.rotate(self.ailerons_axis).unwrap();
         self.elevator_servo.rotate(self.elevator_axis).unwrap();
         self.rudder_servo.rotate(self.rudder_axis).unwrap();
+        self.throttle_servo.rotate(self.throttle_axis).unwrap();
     }
 }
 
