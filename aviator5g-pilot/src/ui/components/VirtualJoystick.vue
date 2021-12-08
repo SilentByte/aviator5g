@@ -52,7 +52,7 @@ export default class VirtualJoystick extends Vue {
     mounted(): void {
         this.manager = nipplejs.create({
             zone: this.$refs.joystick as any,
-            color: this.$vuetify.theme.currentTheme.accent?.toString() || "red",
+            color: this.$vuetify.theme.currentTheme.primary?.toString() || "black",
             mode: "static",
             position: {left: "50%", top: "50%"},
             size: this.size,
