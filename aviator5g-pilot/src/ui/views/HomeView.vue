@@ -7,8 +7,8 @@
         <div class="state-container">
             <table>
                 <tr>
-                    <td>ID:</td>
-                    <td><small>{{ app.vehicleId }}</small></td>
+                    <td>V:</td>
+                    <td>{{ app.vehicleId }}</td>
                 </tr>
                 <tr>
                     <td>A:</td>
@@ -195,14 +195,15 @@ $stick-size: 200px;
 .state-container {
     display: inline-block;
     margin: $margin-width;
-    padding: $margin-width;
+    padding: $margin-width / 2;
 
     color: white;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.3);
     border-radius: 4px;
 
-    font-size: 10px;
+    font-size: 8px;
     font-family: Consolas, monospace;
+    line-height: 8px;
 
     table {
         tr td:nth-child(1) {

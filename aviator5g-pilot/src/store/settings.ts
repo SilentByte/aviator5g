@@ -3,7 +3,10 @@
  * Copyright (c) 2021 SilentByte <https://silentbyte.com/>
  */
 
-import { Uuid } from "@/models";
+import {
+    IVehicleState,
+    Uuid,
+} from "@/models";
 
 class Settings {
     clear() {
@@ -19,6 +22,19 @@ class Settings {
             localStorage.setItem("vehicleId", value);
         } else {
             localStorage.removeItem("vehicleId");
+        }
+    }
+
+    get vehicleState(): IVehicleState | null {
+        const value = localStorage.getItem("vehicleState");
+        return value ? JSON.parse(value) : null;
+    }
+
+    set vehicleState(value: IVehicleState | null) {
+        if(value) {
+            localStorage.setItem("vehicleState", JSON.stringify(value));
+        } else {
+            localStorage.removeItem("vehicleState");
         }
     }
 }

@@ -96,6 +96,7 @@ export class AppModule extends VuexModule {
     @Mutation
     updateVehicleState(state: Partial<IVehicleState>): void {
         Object.assign(this.vehicleState, state);
+        settings.vehicleState = this.vehicleState;
     }
 
     @Action
