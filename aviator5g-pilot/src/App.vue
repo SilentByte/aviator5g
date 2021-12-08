@@ -42,6 +42,9 @@
                     <v-list-item @click="onResetTrims">
                         <v-list-item-title>Reset Trims</v-list-item-title>
                     </v-list-item>
+                    <v-list-item @click="onResetReverses">
+                        <v-list-item-title>Reset Reverses</v-list-item-title>
+                    </v-list-item>
 
                     <v-divider />
 
@@ -96,6 +99,15 @@ export default class App extends Vue {
             elevatorTrim: 0.0,
             rudderTrim: 0.0,
             throttleTrim: 0.0,
+        });
+    }
+
+    private onResetReverses() {
+        this.app.doUpdateVehicleState({
+            aileronsReverse: false,
+            elevatorReverse: false,
+            rudderReverse: false,
+            throttleReverse: false,
         });
     }
 
