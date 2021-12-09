@@ -22,6 +22,7 @@
             </v-toolbar-items>
 
             <v-chip v-if="app.isConnected" small color="success">
+                <!--suppress JSUnresolvedVariable -->
                 <strong>CONNECTED: {{ Math.round(app.roundTripLatency.toMillis() / 2) }}ms</strong>
             </v-chip>
             <v-chip v-else small color="error">
