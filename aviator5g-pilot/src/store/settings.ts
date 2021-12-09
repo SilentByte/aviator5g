@@ -37,6 +37,14 @@ class Settings {
             localStorage.removeItem("vehicleState");
         }
     }
+
+    get flipCameraStream(): boolean {
+        return localStorage.getItem("flipCameraStream") === "true";
+    }
+
+    set flipCameraStream(value: boolean) {
+        localStorage.setItem("flipCameraStream", value.toString());
+    }
 }
 
 export default new Settings();

@@ -57,6 +57,15 @@
             </table>
         </div>
 
+        <VirtualJoystick class="left-stick"
+                         :rest-y="false"
+                         :size="200"
+                         @move="onMoveLeftStick" />
+
+        <VirtualJoystick class="right-stick"
+                         :size="200"
+                         @move="onMoveRightStick" />
+
         <v-slider dense hide-details
                   class="left-stick-trim-horizontal"
                   color="accent"
@@ -94,17 +103,8 @@
                   min="-1"
                   max="+1"
                   step="0.001"
-                  :value="app.vehicleState.throttleTrim"
+                  :value="app.vehicleState.elevatorTrim"
                   @change="onRightStickTrimVerticalChange" />
-
-        <VirtualJoystick class="left-stick"
-                         :rest-y="false"
-                         :size="200"
-                         @move="onMoveLeftStick" />
-
-        <VirtualJoystick class="right-stick"
-                         :size="200"
-                         @move="onMoveRightStick" />
     </div>
 </template>
 
@@ -189,8 +189,9 @@ export default class HomeView extends Vue {
 
 @import "~@/styles/variables.scss";
 
+$edge-offset: 32px;
 $margin-width: 12px;
-$stick-size: 200px;
+$stick-size: 180px;
 
 .state-container {
     display: inline-block;
@@ -215,8 +216,8 @@ $stick-size: 200px;
 .left-stick {
     z-index: 0;
     position: absolute;
-    left: $margin-width;
-    bottom: $margin-width;
+    left: $edge-offset;
+    bottom: $edge-offset;
     width: $stick-size;
     height: $stick-size;
 }
@@ -224,63 +225,63 @@ $stick-size: 200px;
 .right-stick {
     z-index: 0;
     position: absolute;
-    right: $margin-width;
-    bottom: $margin-width;
+    right: $edge-offset;
+    bottom: $edge-offset;
     width: $stick-size;
     height: $stick-size;
 }
 
 .left-stick-trim-horizontal {
     position: absolute;
-    left: 2 * $margin-width;
-    bottom: $margin-width + $stick-size + $margin-width;
+    left: $edge-offset;
+    bottom: $edge-offset + $stick-size + $margin-width;
 
     opacity: 0.2;
 
     & ::v-deep .v-slider {
         margin: 0;
-        width: $stick-size - 2 * $margin-width;
+        width: $stick-size;
     }
 }
 
 .left-stick-trim-vertical {
     position: absolute;
-    left: $margin-width + $stick-size + $margin-width;
-    bottom: 2 * $margin-width;
+    left: $edge-offset + $stick-size + $margin-width;
+    bottom: $edge-offset;
     width: 32px;
 
     opacity: 0.2;
 
     & ::v-deep .v-slider {
         margin: 0;
-        height: $stick-size - 2 * $margin-width;
+        height: $stick-size;
     }
 }
 
 .right-stick-trim-horizontal {
     position: absolute;
-    right: 2 * $margin-width;
-    bottom: $margin-width + $stick-size + $margin-width;
+    right: $edge-offset;
+    bottom: $edge-offset + $stick-size + $margin-width;
 
     opacity: 0.2;
 
     & ::v-deep .v-slider {
         margin: 0;
-        width: $stick-size - 2 * $margin-width;
+        width: $stick-size;
     }
 }
 
 .right-stick-trim-vertical {
     position: absolute;
-    right: $margin-width + $stick-size + $margin-width;
-    bottom: 2 * $margin-width;
+    right: $edge-offset + $stick-size + $margin-width;
+    bottom: $edge-offset;
     width: 32px;
 
     opacity: 0.2;
 
     & ::v-deep .v-slider {
         margin: 0;
-        height: $stick-size - 2 * $margin-width;
+        height: $stick-size;
     }
 }
 

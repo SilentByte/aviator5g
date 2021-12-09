@@ -28,12 +28,15 @@ import {
 
 VuexModuleDecoratorsConfig.rawError = true;
 
+const SOCKET_ENDPOINT = "ws://192.168.0.80:9000";
+const CAMERA_STREAM_ENDPOINT = "http://192.168.0.80:8554";
+
 const DEFAULT_GROUP_ID: Uuid = "14ed4af8-5256-4e74-a5d6-545dfc0b004c" as Uuid;
 const LATENCY_CHECK_INTERVAL_MS = 2000;
 
 function calculateAxisValue(value: number, trim: number, reverse: boolean): number {
     const r = reverse ? +1 : -1;
-    return value * r + trim;
+    return value * r + trim * r;
 }
 
 @Module({
@@ -45,6 +48,8 @@ function calculateAxisValue(value: number, trim: number, reverse: boolean): numb
 export class AppModule extends VuexModule {
     private rws: ReconnectingWebSocket | null = null;
     private latencyInterval = 0;
+
+    cameraStreamEndpointUrl = CAMERA_STREAM_ENDPOINT;
 
     isConnected = false;
     roundTripLatency: Duration = Duration.fromMillis(0);
@@ -61,7 +66,7 @@ export class AppModule extends VuexModule {
             this.rws.close();
         }
 
-        this.rws = new ReconnectingWebSocket("ws://192.168.0.80:9000");
+        this.rws = new ReconnectingWebSocket(SOCKET_ENDPOINT);
 
         const app = getModule(AppModule);
         this.rws.addEventListener("open", () => app.doHandleOpenConnection());

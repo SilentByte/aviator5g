@@ -4,11 +4,16 @@
  -->
 <template>
     <v-app>
+        <div class="camera-stream-container"
+             :style="{
+                backgroundImage: `url('${app.cameraStreamEndpointUrl}')`,
+                transform: `rotate(${flipCameraStream ? 180 : 0}deg)`,
+             }" />
         <v-app-bar app dark dense
                    elevation="0"
                    class="app-bar">
             <v-toolbar-items>
-                <v-btn text>
+                <v-btn text class="px-2">
                     <img width="100%"
                          height="32"
                          src="@/assets/aviator5g.png"
@@ -24,6 +29,11 @@
             </v-chip>
 
             <v-spacer />
+
+            <v-btn icon
+                   @click="onFlipCameraStream">
+                <v-icon>mdi-flip-vertical</v-icon>
+            </v-btn>
 
             <v-btn icon
                    @click="onToggleFullscreen">
@@ -87,9 +97,18 @@ import {
 import { getModule } from "vuex-module-decorators";
 import { AppModule } from "@/store/app";
 
+import settings from "@/store/settings";
+
 @Component
 export default class App extends Vue {
     private readonly app = getModule(AppModule);
+
+    private flipCameraStream = settings.flipCameraStream;
+
+    private onFlipCameraStream() {
+        this.flipCameraStream = !this.flipCameraStream;
+        settings.flipCameraStream = this.flipCameraStream;
+    }
 
     private onToggleFullscreen() {
         if(document.fullscreenElement) {
@@ -137,7 +156,7 @@ export default class App extends Vue {
 
     private onReverseThrottle() {
         this.app.doUpdateVehicleState({
-            throttleReverse: !this.app.vehicleState.aileronsReverse,
+            throttleReverse: !this.app.vehicleState.throttleReverse,
         });
     }
 
@@ -162,6 +181,23 @@ export default class App extends Vue {
 
 .app-bar {
     background-color: rgba($primary-color, 0.4) !important;
+
+    & ::v-deep .v-toolbar__content {
+        padding-left: 0;
+    }
+}
+
+.camera-stream-container {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-size: 100% 100%;
+    background-color: #eee;
+    transform: rotate(90deg);
 }
 
 </style>

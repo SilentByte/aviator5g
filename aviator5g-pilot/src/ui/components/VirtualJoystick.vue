@@ -52,9 +52,10 @@ export default class VirtualJoystick extends Vue {
     mounted(): void {
         this.manager = nipplejs.create({
             zone: this.$refs.joystick as any,
-            color: this.$vuetify.theme.currentTheme.primary?.toString() || "black",
+            color: this.$vuetify.theme.currentTheme.accent?.toString() || "black",
             mode: "static",
             position: {left: "50%", top: "50%"},
+            shape: 'square',
             size: this.size,
             restJoystick: {x: this.restX, y: this.restY},
             maxNumberOfNipples: 1,
@@ -95,6 +96,10 @@ export default class VirtualJoystick extends Vue {
 
 .joystick {
     position: static;
+
+    ::v-deep .nipple .back {
+        border-radius: 999999px;
+    }
 }
 
 </style>
