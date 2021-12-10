@@ -104,6 +104,7 @@ dependencies = [
  "futures-util",
  "log",
  "rppal",
+ "simple-signal",
  "thiserror",
  "tokio",
  "tokio-tungstenite",
@@ -629,6 +630,16 @@ dependencies = [
  "cpufeatures",
  "digest",
  "opaque-debug",
+]
+
+[[package]]
+name = "simple-signal"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "53f7da44adcc42667d57483bd93f81295f27d66897804b757573b61b6f13288b"
+dependencies = [
+ "lazy_static",
+ "libc",
 ]
 
 [[package]]

@@ -130,6 +130,15 @@ impl Servo {
 
         Ok(())
     }
+
+    fn disable(&mut self) -> anyhow::Result<()> {
+        match &mut self.connection {
+            ServoConnection::Hard(c) => c.disable()?,
+            ServoConnection::Soft(c) => c.set_low(),
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Debug)]
@@ -200,6 +209,27 @@ impl VehicleController {
         self.rudder_servo.rotate(self.rudder_axis).unwrap();
         self.throttle_servo.rotate(self.throttle_axis).unwrap();
     }
+
+    fn set_all_neutral(&mut self) {
+        self.ailerons_axis = 0.0;
+        self.elevator_axis = 0.0;
+        self.rudder_axis = 0.0;
+        self.throttle_axis = 0.0;
+
+        self.ailerons_servo.rotate(0.0).unwrap();
+        self.elevator_servo.rotate(0.0).unwrap();
+        self.rudder_servo.rotate(0.0).unwrap();
+        self.throttle_servo.rotate(0.0).unwrap();
+    }
+
+    fn disable_all(&mut self) {
+        self.set_all_neutral();
+
+        self.ailerons_servo.disable().unwrap();
+        self.elevator_servo.disable().unwrap();
+        self.rudder_servo.disable().unwrap();
+        self.throttle_servo.disable().unwrap();
+    }
 }
 
 const VEHICLE_GROUP_ID: &str = "14ed4af8-5256-4e74-a5d6-545dfc0b004c";
@@ -231,8 +261,18 @@ async fn main() -> anyhow::Result<()> {
         .await
         .expect("Failed to send identification payload");
 
-    let vehicle_state = Arc::new(Mutex::new(VehicleController::new()?));
+    let vehicle_controller = Arc::new(Mutex::new(VehicleController::new()?));
     let outgoing = Arc::new(Mutex::new(outgoing));
+
+    simple_signal::set_handler(
+        &[simple_signal::Signal::Int, simple_signal::Signal::Term],
+        {
+            let vehicle_controller = vehicle_controller.clone();
+            move |_| {
+                vehicle_controller.lock().unwrap().disable_all();
+            }
+        },
+    );
 
     incoming
         .try_for_each(|message| async {
@@ -246,13 +286,13 @@ async fn main() -> anyhow::Result<()> {
                     log::debug!("Recieved Control Message: {:?}", control_message);
                     match control_message {
                         ControlMessage::Control(data) => {
-                            let vehicle_state = vehicle_state.clone();
-                            vehicle_state
+                            let vehicle_controller = vehicle_controller.clone();
+                            vehicle_controller
                                 .lock()
                                 .unwrap()
                                 .update_from_control_message_data(data);
 
-                            log::info!("Vehicle state updated: {:?}", vehicle_state);
+                            log::info!("Vehicle state updated: {:?}", vehicle_controller);
                         }
                         ControlMessage::LatencyRequest(data) => {
                             outgoing
@@ -295,6 +335,8 @@ async fn main() -> anyhow::Result<()> {
         })
         .await
         .unwrap();
+
+    vehicle_controller.lock().unwrap().disable_all();
 
     Ok(())
 }
