@@ -49,7 +49,7 @@
                         <v-icon>mdi-cogs</v-icon>
                     </v-btn>
                 </template>
-                <v-list>
+                <v-list dense>
                     <v-list-item @click="onResetTrims">
                         <v-list-item-title>Reset Trims</v-list-item-title>
                     </v-list-item>
