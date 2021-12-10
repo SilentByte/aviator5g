@@ -28,10 +28,10 @@ import {
 
 VuexModuleDecoratorsConfig.rawError = true;
 
-const SOCKET_ENDPOINT = "ws://192.168.0.80:9000";
-const CAMERA_STREAM_ENDPOINT = "http://192.168.0.80:8554";
+const SOCKET_ENDPOINT = process.env.VUE_APP_SOCKET_ENDPOINT_URL;
+const CAMERA_STREAM_ENDPOINT = process.env.VUE_APP_CAMERA_STREAM_ENDPOINT_URL;
 
-const DEFAULT_GROUP_ID: Uuid = "14ed4af8-5256-4e74-a5d6-545dfc0b004c" as Uuid;
+const DEFAULT_GROUP_ID: Uuid = process.env.VUE_APP_DEFAULT_GROUP_ID;
 const LATENCY_CHECK_INTERVAL_MS = 2000;
 
 function calculateAxisValue(value: number, trim: number, reverse: boolean): number {
