@@ -13,12 +13,11 @@ Aviator 5G is an experimental, real-time mission control software package for un
 
 ## Inspiration
 
-The drone and remotely-controlled vehicle industry is growing at an increasingly rapid pace and drones find a large variety of applications, including Emergency Response & Disaster Relief, Land Surveying & Agriculture, Transport & delivery, and many more. Used by both professionals and hobbyists, drones are definitely here to stay.
+The drone and remotely-controlled vehicle industry is growing at an increasingly rapid pace and drones find a large variety of applications, including Emergency Response & Disaster Relief, Land Surveying & Agriculture, Transport & Delivery, and many more. Used by both professionals and hobbyists, drones are definitely here to stay.
 
 However, there are some things that need to be addressed. Not every drone can or is most-optimally controlled fully autonomously. Most missions can greatly benefit from human interaction and sometimes human intervention is a necessity, for example when the drone cannot follow the regular mission plan anymore due to unforeseen situational changes. Rovers can get physically stuck while navigating difficult terrain, drones may lose the radio signal or their GPS fix, or may simply not be able to reach a pre-defined waypoint due to strong winds.
 
-Think of a search & rescue mission. A person has been reported missing and emergency services in the area launch a drone. Mission control is **entirely** cloud-based, so there is **no** setup required.
-Imagery and other sensor data from the drone can be **analyzed in real-time** and operators are notified immediately to effectively alter the mission plan.
+Think of a Search & Rescue mission. A person has been reported missing and emergency services in the area launch a drone. Mission control is **entirely** cloud-based, so there is **no** setup required and precious time is saved. Imagery and other sensor data from the drone can be **analyzed in real-time** using machine learning and operators are notified immediately and can effectively alter the mission plan and potentially save lives in a situation like this.
 
 *"Essentially, Aviator 5G aims to streamline human intervention. Through ever-improving wide-area 5G coverage, **AWS Wavelength is ideal for this use case**."*
 
@@ -47,7 +46,7 @@ The protocol...
 
 * ...supports an number of axes, buttons, and other inputs and values such as GPS coordinates, altitude, compass direction, acceleration, etc.
 
-* ...allows for real-time piloting which is only made pussible due to AWS Wavelength's low latency connections.
+* ...allows for real-time piloting which is only made possible due to AWS Wavelength's low latency connections.
 
 * ...can trivially be adjusted to meet other specific mission requirements.
 
@@ -109,7 +108,7 @@ For general testing during development, we mainly resorted to using a Local Area
 
 ## Accomplishments that we're proud of
 
-We are excited that we managed to achieve our goals during this hackathon and that we were able to create a working prototype of an aircraft entierly controlled through the cloud in real-time with low latency, despite not having direct access to AWS Wavelength at this stage.
+We are excited that we managed to achieve our goals during this hackathon and that we were able to create a working prototype of an aircraft entirely controlled through the cloud in real-time with low latency, despite not having direct access to AWS Wavelength at this stage.
 
 
 ## What we learned
@@ -125,7 +124,7 @@ During the course of this project, we had the chance to try out various things t
 
 We are aiming to further improve the system and go through additional development iterations:
 
-* We would like to focus on video compression an streaming, as this is the part of the system that benefits the most from improvements and optimizations.
+* We would like to focus on video compression and streaming, as this is the part of the system that benefits the most from improvements and optimizations.
 
 * We plan to improve the configurability so that the vehicle control software can be configured externally (e.g. what axis input corresponds to what function of the drone).
 
