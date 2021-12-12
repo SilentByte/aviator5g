@@ -134,4 +134,46 @@ We are aiming to further improve the system and go through additional developmen
 
 ## Development & Building
 
-TODO.
+To build and run this project, you need to install Rust and NodeJS. The easiest way to install Rust is by using the [RustUp Installer](https://rustup.rs). NodeJS is available [here](https://nodejs.org/en/). You will also need to install [Yarn](https://yarnpkg.com).
+
+
+### Messaging Server & Vehicle Control Software
+
+The root of this repository is a Rust/Cargo project. To build the Messaging Server and the Vehicle Control Software, simply run `cargo build --release`. This will download all required dependencies automatically and build both projects.
+
+Once built, the server can be started locally on port 9000 by running `cargo run --release --bin aviator5g-server -- --host 0.0.0.0 --port 9000`.
+
+It supports the following options:
+
+```
+Usage: aviator5g-server [--host <host>] [--port <port>]
+
+Aviator5G Server.
+
+Options:
+  --host            the hostname on which the server listens.
+  --port            the server's port.
+  --help            display usage information
+```
+
+The vehicle control software can be started by running `cargo run --bin aviator5g-vehicle -- --url ws://localhost:9000`. It will connect to the local server we have just started before.
+
+It supports the following options:
+
+```
+Usage: aviator5g-vehicle --url <url>
+
+Aviator5G Vehicle.
+
+Options:
+  --url             the server's endpoint to which this vehicle should attempt
+                    to connect.
+  --help            display usage information
+```
+
+*Note that the vehicle control software should be run on a Raspberry PI as otherwise it will not be able to start up as it cannot connect to the servos.*
+
+
+### Operator Software
+
+The operator software is web-based. It is built using Vue and is available in the `aviator5g-pilot` folder. To build the project, navigate into the folder and run `yarn install` followed by `yarn build`. If you want to execute the app locally, run `yarn serve` instead. The app is then available locally under `http://127.0.0.1:8080`.
