@@ -20,8 +20,6 @@ However, there are some things that need to be addressed. Not every drone can or
 Think of a search & rescue mission. A person has been reported missing and emergency services in the area launch a drone. Mission control is **entirely** cloud-based, so there is **no** setup required.
 Imagery and other sensor data from the drone can be **analyzed in real-time** and operators are notified immediately to effectively alter the mission plan.
 
-![Real-Time Machine Learning Inference](docs/ml_inference.png)
-
 *"Essentially, Aviator 5G aims to streamline human intervention. Through ever-improving wide-area 5G coverage, **AWS Wavelength is ideal for this use case**."*
 
 
